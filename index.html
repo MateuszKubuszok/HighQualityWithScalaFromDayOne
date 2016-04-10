@@ -255,9 +255,116 @@ trait Settings { self: Dependencies =>
 
         <section>
           <h3>Avoid Java in Scala</h3>
+
+          <section></section>
+
+          <section>
+            <pre><code class="hljs scala">// you don't need a return here...
+def isThereADigit1(source: String): Boolean = {
+  for (c <- source) {
+    if (c.isDigit)
+      return true
+  }
+  return false
+}
+
+// ...you just need to check a predicate instead!
+def isThereADigit2(source: String) = source.exists(_.isDigit)</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// you also don't need a return here...
+def findANumber1(source: String): Long = {
+  source split "," foreach { s =>
+    if (s.matches("-?[0-9]+"))
+      return s.toLong
+  }
+  return 0
+}
+
+// ...you just need to find if there is such element
+def findANumber2(source: String) =
+  source split "," find (_.matches("-?[0-9]+"))</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// what about aggregation?
+var sum = 0
+for (i <- 0 until 50) {
+  sum += i
+}
+sum
+
+// well, numbers are quite easy to add up
+(0 until 50).fold(0)(_ + _)
+(0 until 50).reduce(_ + _)
+(0 until 50).sum</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// numbers are also easy to multiply...
+var product = 1
+for (i <- 1 until 7) {
+  product *= i
+}
+product
+
+// ...without iterating manually
+(1 until 7).fold(1)(_ * _)
+(1 until 7).reduce(_ * _)
+(1 until 7).product</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// let's think about exceptional cases
+
+def extractNumbers1a(source: String) = try {
+  source split "," map (_.toLong) toSeq
+} catch {
+  case _: NumberFormatException => Seq()
+}
+
+def extractNumbers2a(source: String) = source split "," flatMap { s =>
+  try {
+    Some(s.toLong)
+  } catch {
+    case _: NumberFormatException => None
+  }
+} toSeq
+</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// try/catch -> Try is a small improvement...
+
+def extractNumbers1b(source: String) =
+  Try(source split "," map (_.toLong) toSeq) getOrElse Seq.empty
+
+def extractNumbers2b(source: String) = source split "," flatMap { s =>
+  Try(s.toLong).toOption
+} toSeq</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// ...but expressing posibility of a failure directly is even better
+
+def extractNumbers1c(source: String) =
+  Try(source split "," map (_.toLong) toSeq)
+
+def extractNumbers2c(source: String) = {
+  val (right, left) = source split "," partition { s =>
+    Try(s.toLong).isSuccess
+  }
+
+  if (left.isEmpty) Right(right map (_.toLong) toSeq)
+  else Left(left.toSeq)
+}</code></pre>
+          </section>
+
           <section>
             <ul>
-              <li class="fragment"><b>don't</b> throw exceptions - <b>instead</b> use Either, Validators or \/</li>
+              <li class="fragment"><b>don't</b> iterate unnecessarily with <i>break</i>s and <i>return</i>s - <b>remember</b> about <i>.fold</i>s, <i>.reduce</i>, <i>.exists</i>, <i>.forall</i>, <i>.find</i>, <i>.partition</i>...</li>
+              <li class="fragment"><b>don't</b> throw exceptions - <b>instead</b> use Either, Validators, \/...</li>
               <li class="fragment"><b>don't</b> use mutable state when possible - <b>instead</b> use immutable state and pass it around</li>
             </ul>
           </section>
