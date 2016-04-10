@@ -52,7 +52,7 @@
         </section>
 
         <section>
-          <h2>Project's setup</h2>
+          <h2>Settings up project</h2>
 
             <pre class="fragment"><code class="hljs scala">
 // build.sbt
@@ -243,19 +243,63 @@ trait Settings { self: Dependencies =>
           </section>
 
           <section>
-            <pre><code class="hljs bash">> sbt compile    # scalariform formatter will run on each compile
-> sbt scalastyle # can be configured to fail on error</code></pre>
+            <pre><code class="hljs bash">> sbt compile                  # scalariform run on each compilation
+> sbt scalastyleGenerateConfig # generate scalastyle-config.xml file
+> sbt scalastyle               # can be configured to fail on error</code></pre>
           </section>
         </section>
 
         <section>
-          <h2>Clean code</h2>
-          TODO
+          <h2>Clean Scala code</h2>
         </section>
 
         <section>
-          <h2>Other people</h2>
-          TODO
+          <h3>Avoid Java in Scala</h3>
+          <section>
+            <ul>
+              <li class="fragment"><b>don't</b> throw exceptions - <b>instead</b> use Either, Validators or \/</li>
+              <li class="fragment"><b>don't</b> use mutable state when possible - <b>instead</b> use immutable state and pass it around</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h3>Avoid abusing Scala features</h3>
+          <section>
+            <ul>
+              <li class="fragment">avoid cake pattern</li>
+              <li class="fragment">avoid using tuples in public API, consider case classes instead</li>
+              <li class="fragment">avoid extremely long monad chains, both for-comprehension and plain map/flatMap/filter</li>
+              <li class="fragment">avoid using pattern matching on distinct types - things that could be checked at compile time, should not be done in runtime</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h2>Keeping other people in mind</h2>
+        </section>
+
+        <section>
+          <h3>Communicating via code</h3>
+
+          <section>
+            <ul>
+              <li class="fragment">deciding on conventions</li>
+              <li class="fragment">using descriptive, meaningful names</li>
+              <li class="fragment">using types to inform how API should be used</li>
+              <li class="fragment">commenting concepts that cannot be expressed with code</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h3>Communicating outside the code</h3>
+          <ul>
+            <li class="fragment">thinking about your users and contributors</li>
+            <li class="fragment">providing README with basic information</li>
+            <li class="fragment">documenting everything that could be important to user, in a way he could find it fast</li>
+            <li class="fragment">being responsible</li>
+          </ul>
         </section>
 
         <section>
