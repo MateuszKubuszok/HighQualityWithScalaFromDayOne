@@ -47,7 +47,7 @@
           <ul>
             <li class="fragment">project's setup</li>
             <li class="fragment">clean code</li>
-            <li class="fragment">other people</li>
+            <li class="fragment">teamwork and collaboration</li>
           </ul>
         </section>
 
@@ -64,6 +64,17 @@ scalaVersion := "2.11.8"
 
         <section>
           <h3>Power of modules</h3>
+
+          <section></section>
+
+          <section>
+            <p>Examples of usage:</p>
+            <ul>
+              <li class="fragment">layered architecture</li>
+              <li class="fragment">hexagonal architecture</li>
+              <li class="fragment">separating boundary contexts</li>
+            </ul>
+          </section>
 
           <section>
             <pre><code class="hljs scala">
@@ -139,15 +150,6 @@ lazy val app  = project.in(file("modules/app"))
 
 ...</code></pre>
           </section>
-
-          <section>
-            <p>Examples of usage:</p>
-            <ul>
-              <li class="fragment">layered architecture</li>
-              <li class="fragment">hexagonal architecture</li>
-              <li class="fragment">separating boundary contexts</li>
-            </ul>
-          </section>
         </section>
 
         <section>
@@ -180,8 +182,6 @@ lazy val app  = project.in(file("modules/app"))
           <section>
             <pre><code class="hljs bash">> sbt test        # test all modules
 > sbt common:test # test only common</code></pre>
-
-            <p class="fragment">Available: <i>ScalaTest</i>, <i>Specs2</i>, <i>Mockito</i>, ...</p>
           </section>
 
           <section>
@@ -259,7 +259,7 @@ trait Settings { self: Dependencies =>
           <section></section>
 
           <section>
-            <pre><code class="hljs scala">// you don't need a return here...
+            <pre><code class="hljs scala">// usually you don't want return like this one...
 def isThereADigit1(source: String): Boolean = {
   for (c <- source) {
     if (c.isDigit)
@@ -268,12 +268,12 @@ def isThereADigit1(source: String): Boolean = {
   return false
 }
 
-// ...you just need to check a predicate instead!
+// ...you probably wanted some predicate instead
 def isThereADigit2(source: String) = source.exists(_.isDigit)</code></pre>
           </section>
 
           <section>
-            <pre><code class="hljs scala">// you also don't need a return here...
+            <pre><code class="hljs scala">// you probably didn't wanted return here as well...
 def findANumber1(source: String): Long = {
   source split "," foreach { s =>
     if (s.matches("-?[0-9]+"))
@@ -282,7 +282,7 @@ def findANumber1(source: String): Long = {
   return 0
 }
 
-// ...you just need to find if there is such element
+// ...you most likely needed to "find" first occurrence
 def findANumber2(source: String) =
   source split "," find (_.matches("-?[0-9]+"))</code></pre>
           </section>
@@ -372,12 +372,142 @@ def extractNumbers2c(source: String) = {
 
         <section>
           <h3>Avoid abusing Scala features</h3>
+
+          <section></section>
+
           <section>
+            <pre><code class="hljs scala">trait MyService { ... }
+
+trait MyServiceComponent {
+
+  def myService: MyService
+}
+
+trait MyServiceComponentImpl { self: MyOtherServiceComponent =>
+
+  object myService extends MyService { ... }
+}</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">trait MyOtherServiceComponentMock extends Mockito {
+
+  val myService = mock[MyService]
+}
+
+val testComponent = new MyServiceComponentImpl
+   with MyOtherServiceComponentMock</code></pre>
+
+            <pre><code class="hljs scala">class ComponentRegistry
+    extends MyServiceComponentImpl
+    with MyOtherServiceComponentImpl</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">trait CommonComponentRegistryImpl extends CommonComponentRegistry
+    with MyServiceComponentImpl
+    with MyOtherServiceComponentImpl
+    ...
+
+trait ModelComponentRegistryImpl extends ModelComponentRegistry
+    with UserRepositoryComponentImpl
+    with AddressRepositoryComponentImpl
+    ...
+    { self: CommonComponentRegistry
+       with DBDriverComponent
+       ...
+}</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">trait CommonComponentRegistryImpl extends CommonComponentRegistry
+    with MyServiceComponentImpl
+    with MyOtherServiceComponentImpl
+    ...
+
+trait ModelComponentRegistryImpl extends ModelComponentRegistry
+    with UserRepositoryComponentImpl
+    with AddressRepositoryComponentImpl
+    ...
+    { self: CommonComponentRegistry
+       with DBDriverComponent
+       ...
+}</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">class UserRecordsRepository(...) {
+
+  def fetch(id: Long): Option[(Long, String, Long, Date)]
+
+  def save(record: (String, Long, Date)): (Long, String, Long, Date)
+
+  def update(record: (String, Long, Date)): Boolean
+}</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">case class UserRecord(
+    id: Option[Long], name: String, addressId: Long, lastUpdate: Date)
+
+class UserRecordsRepository(...) {
+
+  def fetch(id: Long): Option[UserRecord]
+
+  def save(record: User): User
+
+  def update(record: User): Boolean
+}</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// we love debugging those
+def prepareMailSubscriptionsForFriends(userCollection: Seq[User]) =
+  userCollection
+    .flatMap(getFriendsAddresses)
+    .filter(onlyContactAddresses)
+    .map(enrichAddressesWithDetails)
+    .filter(onlySupportedLocations)
+    ... //
+</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// we love debugging those even more
+def createFriendsActivity: JSonValue = for {
+  currentUserId <- context.currentUserId.toSeq
+  user          <- userRepository.find(currentUserId)
+  address       <- addressRepository.find(user.addressId)
+  friends       =  userRepository.findFriendsOf(user.id)
+  friend        <- friends if newerThanYesterday(friend.lastVisited)
+  ... // 30 more lines of for comprehension
+} yield JSon.obj(
+  "user" -> JSon.obj(...),
+  "address" -> JSon.obj(...),
+  ...
+)</code></pre>
+          </section>
+
+          <section>
+            <pre><code class="hljs scala">// if only there was a way to handle it at compile time...
+def handleValue(value: Any) = value match {
+  case l: Long => ...
+  case s: String => ...
+  case _ => throw UnsupportedOperationException("type not supported")
+}
+
+// ...with type safety and everything
+def handleValue(value: Long) = ...
+def handleValue(value: String) = ...</code></pre>
+          </section>
+
+          <section>
+            <p>Try to avoid:</p>
             <ul>
-              <li class="fragment">avoid cake pattern</li>
-              <li class="fragment">avoid using tuples in public API, consider case classes instead</li>
-              <li class="fragment">avoid extremely long monad chains, both for-comprehension and plain map/flatMap/filter</li>
-              <li class="fragment">avoid using pattern matching on distinct types - things that could be checked at compile time, should not be done in runtime</li>
+              <li class="fragment">cake pattern</li>
+              <li class="fragment">using tuples in public API, consider case classes instead</li>
+              <li class="fragment">extremely long monad chains, both for-comprehension and plain map/flatMap/filter</li>
+              <li class="fragment">using pattern matching on distinct types - things that could be checked at compile time, should not be done in runtime</li>
             </ul>
           </section>
         </section>
