@@ -52,7 +52,7 @@
         </section>
 
         <section>
-          <h2>Settings up project</h2>
+          <h2>Setting up project</h2>
 
             <pre class="fragment"><code class="hljs scala">
 // build.sbt
@@ -164,7 +164,7 @@ lazy val app  = project.in(file("modules/app"))
 
   "Utils.convertToX" should {
 
-    "be positive number" in {
+    "be a positive number" in {
       // given
       val y = ...
 
@@ -259,7 +259,7 @@ trait Settings { self: Dependencies =>
           <section></section>
 
           <section>
-            <pre><code class="hljs scala">// usually you don't want return like this one...
+            <pre><code class="hljs scala">// usually you don't want returns like this one...
 def isThereADigit1(source: String): Boolean = {
   for (c <- source) {
     if (c.isDigit)
@@ -273,7 +273,7 @@ def isThereADigit2(source: String) = source.exists(_.isDigit)</code></pre>
           </section>
 
           <section>
-            <pre><code class="hljs scala">// you probably didn't wanted return here as well...
+            <pre><code class="hljs scala">// you probably didn't want a return here as well...
 def findANumber1(source: String): Long = {
   source split "," foreach { s =>
     if (s.matches("-?[0-9]+"))
@@ -283,8 +283,8 @@ def findANumber1(source: String): Long = {
 }
 
 // ...you most likely needed to "find" first occurrence
-def findANumber2(source: String) =
-  source split "," find (_.matches("-?[0-9]+"))</code></pre>
+def findANumber2(source: String): Option[Long] =
+  source split "," find (_.matches("-?[0-9]+")) map (_.toLong)</code></pre>
           </section>
 
           <section>
@@ -448,14 +448,17 @@ trait ModelComponentRegistryImpl extends ModelComponentRegistry
           </section>
 
           <section>
-            <pre><code class="hljs scala">case class UserRecord(
+            <pre><code class="hljs scala">
+case class User(name: String, addressId: Long, lastUpdate: Date)
+
+case class UserRecord(
     id: Option[Long], name: String, addressId: Long, lastUpdate: Date)
 
 class UserRecordsRepository(...) {
 
   def fetch(id: Long): Option[UserRecord]
 
-  def save(record: User): User
+  def save(record: User): UserRecord
 
   def update(record: User): Boolean
 }</code></pre>
@@ -543,10 +546,10 @@ def handleValue(value: String) = ...</code></pre>
         <section>
           <h2>Summary</h2>
           <ul>
-            <li class="fragment">use possibilities that build tool gives you</li>
+            <li class="fragment">use possibilities that the build tool gives you</li>
             <li class="fragment">avoid Java in Scala</li>
             <li class="fragment">less is more</li>
-            <li class="fragment">think about people that will be using project</li>
+            <li class="fragment">think about people that will be using the project</li>
             <li class="fragment">think about people that will be contributing to it</li>
           </ul>
         </section>
