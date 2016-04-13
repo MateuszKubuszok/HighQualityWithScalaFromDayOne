@@ -396,7 +396,8 @@ trait MyServiceComponentImpl { self: MyOtherServiceComponent =>
 }
 
 val testComponent = new MyServiceComponentImpl
-   with MyOtherServiceComponentMock</code></pre>
+   with MyOtherServiceComponentMock
+   {}</code></pre>
 
             <pre><code class="hljs scala">class ComponentRegistry
     extends MyServiceComponentImpl
